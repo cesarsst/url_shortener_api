@@ -1,0 +1,46 @@
+services:
+  app:
+    build: .
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
+    environment:
+      SECRET_KEY: your_secret_key
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: root
+      DB_PASSWORD: admintest
+      DB_NAME: dbdev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - app-network
+  db:
+    image: postgres:15
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: root  # default postgres user to access the db
+      POSTGRES_PASSWORD: admintest # default postgres password to access the db
+      POSTGRES_DB: dbdev # default postgres database to connect to
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+volumes:
+  postgres_data:
+    driver: local
+networks:
+  app-network:
+    driver: bridge
