@@ -8,7 +8,7 @@
 - IMPORTANTE: Altere o nome do banco de dados no script './init.sql' para o banco de dados de desenvolvimento para criar automáticamente a estrutura de tabelas.
 
 ```
-psql -h localhost -U {USER} -d {DB_NAME} -f ./init.sql
+psql -h localhost -U {USER} -p {PORT} -d {DB_NAME} -f ./init.sql
 ```
 
 s 2. Instale as depêndencias do projeto e execute a aplicação
@@ -23,3 +23,9 @@ npm run dev
 ```
 npm run dev:docker
 ```
+
+# TODO
+
+- Arrumar a inicialização da base para testes automaticos.
+- Verificar nomes de variavies e funçõe para o padrão.
+- Mehorar a arquitetura do banco de dados (relações e chaves estrangeiras).

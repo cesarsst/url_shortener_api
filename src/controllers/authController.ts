@@ -13,11 +13,9 @@ export const register = async (req: Request, res: Response) => {
     }
 
     if (!name || !email || !password) {
-      res
-        .status(400)
-        .json({
-          message: "All fields are necessary (name, email and password)!",
-        });
+      res.status(400).json({
+        message: "All fields are necessary (name, email and password)!",
+      });
       return;
     }
 
