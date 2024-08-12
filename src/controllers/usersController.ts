@@ -54,7 +54,7 @@ export const updateUrl = async (req: Request, res: Response) => {
     if (!url) return res.status(400).json({ message: "URL is required" });
     if (!id) return res.status(400).json({ message: "URL ID is required" });
 
-    const urlResult = await urlModel.getUrlById(id);
+    const urlResult = await urlModel.getUrlActiveById(id);
     if (urlResult.rowCount === 0) {
       return res.status(404).json({ message: "URL not found" });
     }
