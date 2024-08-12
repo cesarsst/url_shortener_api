@@ -5,6 +5,6 @@ export type UserTokenDecoded = {
 
 declare module "express-serve-static-core" {
   interface Request {
-    user?: UserTokenDecoded; // Torne a propriedade opcional para garantir que a tipagem seja segura
+    user?: UserTokenDecoded;
   }
 }

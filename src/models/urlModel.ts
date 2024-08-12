@@ -47,8 +47,8 @@ export default class UrlModel {
 
   static incrementAccessCounter(id: string): Promise<QueryResult> {
     return db.query(
-      "UPDATE urls SET access_counter = access_counter + 1 WHERE id = $1",
-      [id]
+      "UPDATE urls SET access_counter = access_counter + 1, last_update = $2 WHERE id = $1",
+      [id, new Date()]
     );
   }
 }
