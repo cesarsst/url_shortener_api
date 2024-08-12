@@ -37,9 +37,14 @@ const authMiddleware = asyncHandler(
       } else {
         throw new Error("Unauthorized");
       }
-    } catch (error: any) {
-      // console.error(error.message);
-      res.status(401).json({ message: "Unauthorized" });
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error.message);
+        res.status(401).json({ message: "Unauthorized" });
+      } else {
+        console.error("An unexpected error occurred");
+        res.status(500).json({ message: "An unexpected error occurred" });
+      }
     }
   }
 );

@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
-import { db } from "../db";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import UserModel from "../models/userModel";
+
 const SECRET_KEY = process.env.SECRET_KEY || "secret";
 
 export const register = async (req: Request, res: Response) => {
@@ -26,10 +27,7 @@ export const register = async (req: Request, res: Response) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await db.query(
-      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *",
-      [name, email, hashedPassword]
-    );
+    const newUser = await UserModel.createUser(name, email, hashedPassword);
 
     const token = jwt.sign(
       { userId: newUser.rows[0].id, email },
@@ -39,9 +37,14 @@ export const register = async (req: Request, res: Response) => {
       }
     );
     res.status(201).json({ token });
-  } catch (error: any) {
-    console.error(error.message);
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      res.status(500).json({ message: error.message });
+    } else {
+      console.error("An unexpected error occurred");
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 };
 
@@ -65,13 +68,18 @@ export const login = async (req: Request, res: Response) => {
       expiresIn: "2h",
     });
     res.status(200).json({ token });
-  } catch (error: any) {
-    console.error(error.message);
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      res.status(500).json({ message: error.message });
+    } else {
+      console.error("An unexpected error occurred");
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 };
 
 const verifyIfUserExists = async (email: string) => {
-  const user = await db.query("SELECT * FROM users WHERE email = $1", [email]);
+  const user = await UserModel.getUserByEmail(email);
   return user.rows[0];
 };

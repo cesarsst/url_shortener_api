@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import { verifyIfUrlIsValid } from "../utils/url";
 import { generateShortHash } from "../utils/shortenUrl";
-import { db } from "../db";
 import jwt from "jsonwebtoken";
 import type { UserTokenDecoded } from "../types";
+import UserModel from "../models/userModel";
+import UrlModel from "../models/urlModel";
 
 export const shortenUrl = async (req: Request, res: Response) => {
   try {
@@ -24,10 +25,7 @@ export const shortenUrl = async (req: Request, res: Response) => {
       const decoded = jwt.verify(token, process.env.SECRET_KEY || "secret");
       const { userId, email } = decoded as UserTokenDecoded;
 
-      user = await db.query(
-        "SELECT * FROM users WHERE id = $1 AND email = $2",
-        [userId, email]
-      );
+      user = await UserModel.getUserById(userId);
       if (user.rows.length === 0) {
         return res.status(401).json({ message: "User not found" });
       } else {
@@ -39,7 +37,7 @@ export const shortenUrl = async (req: Request, res: Response) => {
     let hash = null;
     while (hash === null) {
       hash = generateShortHash();
-      const result = await db.query("SELECT * FROM urls WHERE id = $1", [hash]);
+      const result = await UrlModel.getUrlById(hash);
       if (result.rows.length === 0) {
         break;
       } else {
@@ -51,21 +49,20 @@ export const shortenUrl = async (req: Request, res: Response) => {
 
     // Save the URL in the database
     if (req.user) {
-      await db.query(
-        "INSERT INTO urls (id, owner, url_target, access_counter, last_update) VALUES ($1, $2, $3, $4, $5)",
-        [hash, req.user.userId, url, 0, new Date()]
-      );
+      await UrlModel.createUrl(url, hash, req.user.userId);
     } else {
-      await db.query(
-        "INSERT INTO urls (id, url_target, access_counter, last_update) VALUES ($1, $2, $3, $4)",
-        [hash, url, 0, new Date()]
-      );
+      await UrlModel.createUrl(url, hash, null);
     }
 
     res.status(201).json({ shortUrl });
-  } catch (error: any) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      res.status(500).json({ message: error.message });
+    } else {
+      console.error("An unexpected error occurred");
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 };
 
@@ -75,21 +72,23 @@ export const getShortenUrl = async (req: Request, res: Response) => {
 
     if (!id) return res.status(400).json({ message: "URL id is required" });
 
-    const result = await db.query("SELECT * FROM urls WHERE id = $1", [id]);
+    const result = await UrlModel.getUrlById(id);
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "URL not found" });
     }
 
     // Update access counter
-    await db.query(
-      "UPDATE urls SET access_counter = access_counter + 1 WHERE id = $1",
-      [id]
-    );
+    await UrlModel.incrementAccessCounter(id);
 
     const { url_target } = result.rows[0];
     res.status(302).redirect(url_target);
-  } catch (error: any) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      res.status(500).json({ message: error.message });
+    } else {
+      console.error("An unexpected error occurred");
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 };

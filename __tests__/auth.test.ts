@@ -52,10 +52,15 @@ describe("GET /register", () => {
       password: "tester123",
     });
     expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty(
-      "message",
-      "All fields are necessary (name, email and password)!"
-    );
+    expect(response.body).toHaveProperty("message", [
+      {
+        location: "body",
+        msg: "Invalid value",
+        path: "name",
+        type: "field",
+        value: "",
+      },
+    ]);
 
     const response2 = await request(app).post("/auth/register").send({
       name: "Jhon tester",
@@ -63,10 +68,15 @@ describe("GET /register", () => {
       password: "tester123",
     });
     expect(response2.status).toBe(400);
-    expect(response2.body).toHaveProperty(
-      "message",
-      "All fields are necessary (name, email and password)!"
-    );
+    expect(response2.body).toHaveProperty("message", [
+      {
+        location: "body",
+        msg: "Invalid value",
+        path: "email",
+        type: "field",
+        value: "",
+      },
+    ]);
 
     const response3 = await request(app).post("/auth/register").send({
       name: "Jhon tester",
@@ -74,10 +84,53 @@ describe("GET /register", () => {
       password: "",
     });
     expect(response3.status).toBe(400);
-    expect(response3.body).toHaveProperty(
-      "message",
-      "All fields are necessary (name, email and password)!"
-    );
+    expect(response3.body).toHaveProperty("message", [
+      {
+        location: "body",
+        msg: "Invalid value",
+        path: "password",
+        type: "field",
+        value: "",
+      },
+    ]);
+  });
+
+  it("should return 400 if password is less than 6 characters or invalid", async () => {
+    const response = await request(app).post("/auth/register").send({
+      name: "Jhon tester",
+      email: "jhon@test.com",
+      password: "test",
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toMatchObject([
+      {
+        type: "field",
+        value: "test",
+        msg: "Invalid value",
+        path: "password",
+        location: "body",
+      },
+    ]);
+  });
+
+  it("Should return 400 if email is invalid", async () => {
+    const response = await request(app).post("/auth/register").send({
+      name: "Jhon tester",
+      email: "jhon@test",
+      password: "tester123",
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toMatchObject([
+      {
+        type: "field",
+        value: "jhon@test",
+        msg: "Invalid value",
+        path: "email",
+        location: "body",
+      },
+    ]);
   });
 });
 

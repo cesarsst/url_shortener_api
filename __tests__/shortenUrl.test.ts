@@ -3,7 +3,6 @@ import { describe, it, expect } from "@jest/globals";
 import app from "../src/index";
 import { db } from "../src/db/index";
 import bycrypt from "bcrypt";
-import e from "express";
 
 describe("Shorten URL controller", () => {
   beforeAll(async () => {
@@ -96,7 +95,9 @@ describe("Shorten URL controller", () => {
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("message");
-    expect(response.body.message).toBe("URL is required");
+    expect(response.body.message).toMatchObject([
+      { location: "body", msg: "Invalid URL", path: "url", type: "field" },
+    ]);
   });
 
   it("Should return an error when URL is invalid", async () => {
@@ -106,7 +107,15 @@ describe("Shorten URL controller", () => {
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("message");
-    expect(response.body.message).toBe("Invalid URL");
+    expect(response.body.message).toMatchObject([
+      {
+        location: "body",
+        msg: "Invalid URL",
+        path: "url",
+        type: "field",
+        value: "test",
+      },
+    ]);
   });
 
   it("Should return target URL when short URL is provided", async () => {

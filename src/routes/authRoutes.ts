@@ -1,7 +1,13 @@
 import express from "express";
 import { login, register } from "../controllers/authController";
+import { validateRegister, validateLogin } from "../validators/authValidator";
 
 const router = express.Router();
+
+router.route("/login").post(validateLogin, login);
+router.route("/register").post(validateRegister, register);
+
+export default router;
 
 /**
  * @swagger
@@ -25,10 +31,15 @@ const router = express.Router();
  *             properties:
  *               email:
  *                 type: string
+ *                 description: The email address of the user. Must be a valid email format.
  *                 example: "user@example.com"
  *               password:
  *                 type: string
+ *                 description: The password for the user account. Must be a string with at least 6 characters.
  *                 example: "password123"
+ *             required:
+ *               - email
+ *               - password
  *     responses:
  *       200:
  *         description: Successful login, returns a JWT token
@@ -41,7 +52,13 @@ const router = express.Router();
  *                   type: string
  *                   description: JWT token for authentication
  *       400:
- *         description: User does not exist or Invalid password
+ *         description: |
+ *           Validation errors or invalid credentials:
+ *           - Email must be a valid email address.
+ *           - Password must be a string with at least 6 characters.
+ *           - Possible error messages:
+ *             - "User does not exist"
+ *             - "Invalid password"
  *         content:
  *           application/json:
  *             schema:
@@ -49,7 +66,7 @@ const router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "User does not exist"
+ *                   example: "Invalid password"
  *       500:
  *         description: Internal server error
  *         content:
@@ -77,13 +94,23 @@ const router = express.Router();
  *             properties:
  *               name:
  *                 type: string
+ *                 description: The name of the user
  *                 example: "John Doe"
+ *                 minLength: 3
  *               email:
  *                 type: string
+ *                 description: The email address of the user
  *                 example: "user@example.com"
+ *                 format: email
  *               password:
  *                 type: string
+ *                 description: The password for the user account
  *                 example: "password123"
+ *                 minLength: 6
+ *             required:
+ *               - name
+ *               - email
+ *               - password
  *     responses:
  *       201:
  *         description: User successfully registered, returns a JWT token
@@ -97,8 +124,10 @@ const router = express.Router();
  *                   description: JWT token for authentication
  *       400:
  *         description: |
- *           All fields are necessary (name, email, and password)!
- *           User already exists
+ *           Validation errors or the user already exists.
+ *           - Name must be a string with at least 3 characters.
+ *           - Email must be a valid email address.
+ *           - Password must be a string with at least 6 characters.
  *         content:
  *           application/json:
  *             schema:
@@ -118,8 +147,3 @@ const router = express.Router();
  *                   type: string
  *                   example: "Error registering user"
  */
-
-router.route("/login").post(login);
-router.route("/register").post(register);
-
-export default router;

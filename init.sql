@@ -26,10 +26,6 @@ BEGIN
             email VARCHAR(255) NOT NULL,
             password VARCHAR(255) NOT NULL
         );
-        
-        -- -- Inserir um usuário administrador
-        -- INSERT INTO users (name, email, password)
-        -- VALUES ('admin', 'admin@example.com', 'admin123');
     END IF;
 END $$;
 
@@ -49,9 +45,5 @@ BEGIN
             last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             exclude_date TIMESTAMP DEFAULT NULL
         );
-
-        -- -- Insira uma URL de exemplo
-        -- INSERT INTO urls (id, owner, url_target, access_counter, last_update) 
-        -- VALUES ('abc123', 1, 'https://www.example.com', 0, CURRENT_TIMESTAMP);
     END IF;
 END $$;

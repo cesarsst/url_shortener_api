@@ -1,10 +1,10 @@
 import express from "express";
 import { getShortenUrl, shortenUrl } from "../controllers/shortenUrlController";
-
+import { shortenUrlValidator } from "../validators/shortenUrlValidator";
 const router = express.Router();
 
 router.route("/:id").get(getShortenUrl);
-router.route("/generateShortLink").post(shortenUrl);
+router.route("/generateShortLink").post(shortenUrlValidator, shortenUrl);
 
 export default router;
 
@@ -32,7 +32,10 @@ export default router;
  *             properties:
  *               url:
  *                 type: string
+ *                 description: The URL to be shortened. Must be a valid URL.
  *                 example: "https://www.example.com"
+ *             required:
+ *               - url
  *     responses:
  *       201:
  *         description: URL successfully shortened
@@ -46,7 +49,9 @@ export default router;
  *                   description: The shortened URL
  *                   example: "http://localhost/abc123"
  *       400:
- *         description: Invalid or missing URL
+ *         description: |
+ *           Invalid or missing URL. The URL provided is not valid or is missing from the request.
+ *           - URL must be a valid URL format.
  *         content:
  *           application/json:
  *             schema:
@@ -54,7 +59,7 @@ export default router;
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "URL is required"
+ *                   example: "Invalid URL"
  *       401:
  *         description: User is not authenticated or user not found
  *         content:
@@ -81,7 +86,7 @@ export default router;
  * @swagger
  * /{id}:
  *   get:
- *     summary: Redirect to the original URL using the shortened URL id
+ *     summary: Redirect to the original URL using the shortened URL ID
  *     tags: [URL Shortener]
  *     parameters:
  *       - in: path
@@ -89,12 +94,15 @@ export default router;
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the shortened URL
+ *           minLength: 6
+ *         description: The ID of the shortened URL. Must be a string with 6 characters.
  *     responses:
  *       302:
  *         description: Redirects to the original URL
  *       400:
- *         description: URL ID is required
+ *         description: |
+ *           Invalid or missing URL ID. The ID provided is not valid or is missing.
+ *           - ID must be a string with 6 characters.
  *         content:
  *           application/json:
  *             schema:
@@ -102,7 +110,7 @@ export default router;
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "URL id is required"
+ *                   example: "URL ID is required and must be 6 characters long"
  *       404:
  *         description: URL not found
  *         content:
@@ -121,6 +129,4 @@ export default router;
  *               type: object
  *               properties:
  *                 message:
- *                   type: string
- *                   example: "An error occurred while retrieving the URL"
  */

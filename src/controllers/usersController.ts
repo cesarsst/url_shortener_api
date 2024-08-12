@@ -1,34 +1,52 @@
 import { Request, Response } from "express";
-import { db } from "../db";
+import userModel from "../models/userModel";
+import urlModel from "../models/urlModel";
 
 export const me = async (req: Request, res: Response) => {
   try {
-    const user = await db.query("SELECT id, email FROM users WHERE id = $1", [
-      req.user.userId,
-    ]);
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await userModel.getUserById(req.user.userId);
 
     res.status(200).json(user.rows[0]);
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      res.status(500).json({ message: error.message });
+    } else {
+      console.error("An unexpected error occurred");
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 };
 
 export const getUserUrls = async (req: Request, res: Response) => {
   try {
-    const urls = await db.query(
-      "SELECT * FROM urls WHERE owner = $1 and exclude_date IS NULL",
-      [req.user.userId]
-    );
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
+    const urls = await userModel.getUserUrls(req.user.userId);
     res.status(200).json(urls.rows);
-  } catch (error: any) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      res.status(500).json({ message: error.message });
+    } else {
+      console.error("An unexpected error occurred");
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 };
 
 export const updateUrl = async (req: Request, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const { userId } = req.user;
     const { id } = req.params;
     const { url } = req.body;
@@ -36,7 +54,7 @@ export const updateUrl = async (req: Request, res: Response) => {
     if (!url) return res.status(400).json({ message: "URL is required" });
     if (!id) return res.status(400).json({ message: "URL ID is required" });
 
-    const urlResult = await db.query("SELECT * FROM urls WHERE id = $1", [id]);
+    const urlResult = await urlModel.getUrlById(id);
     if (urlResult.rowCount === 0) {
       return res.status(404).json({ message: "URL not found" });
     }
@@ -45,26 +63,32 @@ export const updateUrl = async (req: Request, res: Response) => {
       return res.status(403).json({ message: "Forbidden" });
     }
 
-    await db.query(
-      "UPDATE urls SET url_target = $1, last_update = $2 WHERE id = $3",
-      [url, new Date(), id]
-    );
+    await urlModel.updateUrl(id, url);
 
     res.status(200).json({ message: "URL updated successfully" });
-  } catch (error: any) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      res.status(500).json({ message: error.message });
+    } else {
+      console.error("An unexpected error occurred");
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 };
 
 export const deleteUrl = async (req: Request, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const { userId } = req.user;
     const { id } = req.params;
 
     if (!id) return res.status(400).json({ message: "URL ID is required" });
 
-    const url = await db.query("SELECT * FROM urls WHERE id = $1", [id]);
+    const url = await urlModel.getUrlById(id);
     if (url.rowCount === 0) {
       return res.status(404).json({ message: "URL not found" });
     }
@@ -77,15 +101,16 @@ export const deleteUrl = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "URL already deleted" });
     }
 
-    // UPDATE exclude_date to the current date
-    await db.query("UPDATE urls SET exclude_date = $1 WHERE id = $2", [
-      new Date(),
-      id,
-    ]);
+    await urlModel.deleteUrl(id);
 
     res.status(200).json({ message: "URL deleted successfully" });
-  } catch (error: any) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      res.status(500).json({ message: error.message });
+    } else {
+      console.error("An unexpected error occurred");
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 };
