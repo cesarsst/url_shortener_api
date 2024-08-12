@@ -1,19 +1,5 @@
 DO $$
 BEGIN
-    -- Verificar se o banco de dados "dbdev" existe
-    IF NOT EXISTS (
-        SELECT FROM pg_database WHERE datname = 'dbdev'
-    ) THEN
-        -- Criar o banco de dados "dbdev" se não existir
-        PERFORM dblink_exec('dbname=' || current_database(), 'CREATE DATABASE dbdev');
-    END IF;
-END $$;
-
--- Conectar ao banco de dados "dbdev"
-\c dbdev;
-
-DO $$
-BEGIN
     -- Verificar se a tabela "users" existe
     IF NOT EXISTS (
         SELECT FROM information_schema.tables

@@ -1,7 +1,7 @@
 import request from "supertest";
 import { describe, it, expect } from "@jest/globals";
-import app from "../src/index";
-import { db } from "../src/db/index";
+import app from "../index";
+import { db } from "../db/index";
 import bycrypt from "bcrypt";
 
 describe("Shorten URL controller", () => {

@@ -20,8 +20,11 @@ RUN npm install
 USER node
 
 # Exponha a porta que o aplicativo usará
-EXPOSE 3000
+EXPOSE 80
 
-# Defina o comando para iniciar o aplicativo
-# CMD ["npm", "start"]
+# Development mode
 CMD ["npm", "run", "dev"]
+
+# Production mode
+# CMD ["npm", "run", "build"]
+# CMD ["npm", "run", "start"]

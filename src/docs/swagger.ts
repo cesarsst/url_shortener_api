@@ -12,7 +12,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "http://localhost:80", // URL base do seu servidor
+        url: `${process.env.BASE_URL}:${process.env.PORT}`, // URL base do seu servidor
       },
     ],
   },

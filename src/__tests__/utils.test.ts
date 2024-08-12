@@ -1,7 +1,7 @@
 import { describe, it, expect } from "@jest/globals";
 
-import { generateShortHash } from "../src/utils/shortenUrl";
-import { verifyIfUrlIsValid } from "../src/utils/url";
+import { generateShortHash } from "../utils/shortenUrl";
+import { verifyIfUrlIsValid } from "../utils/url";
 
 describe("Utils", () => {
   it("should return a valid hash with lenght 6", async () => {
