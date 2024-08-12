@@ -4,6 +4,7 @@ import "./instrument"; // Instrumentation for code coverage and error tracking (
 import swaggerUi from "swagger-ui-express";
 import { swaggerDocs } from "./docs/swagger";
 import express from "express";
+import path from "path";
 import * as Sentry from "@sentry/node";
 
 // Routes import
@@ -15,6 +16,8 @@ const app = express();
 const port = process.env.PORT || 80;
 
 app.use(express.json()); // Body parser
+// Serve arquivos estáticos (como HTML) da pasta 'views'
+app.use(express.static(path.join(__dirname, "public")));
 
 // Routes setup
 app.use("/", shortenUrlRoutes);

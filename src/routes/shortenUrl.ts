@@ -1,8 +1,13 @@
 import express from "express";
 import { getShortenUrl, shortenUrl } from "../controllers/shortenUrlController";
 import { shortenUrlValidator } from "../validators/shortenUrlValidator";
+import path from "path";
+
 const router = express.Router();
 
+router.route("/").get((req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 router.route("/:id").get(getShortenUrl);
 router.route("/generateShortLink").post(shortenUrlValidator, shortenUrl);
 

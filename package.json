@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "npx eslint .",
-    "build": "tsc",
+    "build": "tsc && node copyFiles.mjs",
     "start": "node dist/src/index.js",
     "dev": "nodemon src/index.ts",
     "test": "jest --runInBand ",
