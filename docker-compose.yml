@@ -5,7 +5,7 @@ services:
       watch:
         - action: sync
           path: .
-          target: /app
+          target: .
           ignore:
             - node_modules/
         - action: rebuild

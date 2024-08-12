@@ -2,7 +2,7 @@
 FROM node:20
 
 # Defina o diretório de trabalho dentro do container
-WORKDIR /app
+WORKDIR .
 
 # Copie o package.json e o package-lock.json para o diretório de trabalho
 COPY package*.json ./
@@ -11,10 +11,10 @@ COPY package*.json ./
 RUN npm install
 
 # Copie o restante do código do projeto para o diretório de trabalho
-# COPY . .
+COPY . .
 
 # Compile o código TypeScript
-# RUN npm run build
+RUN npm run build
 
 # Dont use user root
 USER node
@@ -23,8 +23,7 @@ USER node
 EXPOSE 80
 
 # Development mode
-CMD ["npm", "run", "dev"]
+# CMD ["npm", "run", "dev"]
 
 # Production mode
-# CMD ["npm", "run", "build"]
-# CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start"]
