@@ -2,13 +2,16 @@ import { db } from "../db";
 import { QueryResult } from "pg";
 
 export default class UrlModel {
-  static async getAllUrls(): Promise<QueryResult> {
-    const result = await db.query("SELECT * FROM urls");
+  static async getUrlById(id: string): Promise<QueryResult> {
+    const result = await db.query("SELECT * FROM urls WHERE id = $1", [id]);
     return result;
   }
 
-  static async getUrlById(id: string): Promise<QueryResult> {
-    const result = await db.query("SELECT * FROM urls WHERE id = $1", [id]);
+  static async getUrlActiveById(id: string): Promise<QueryResult> {
+    const result = await db.query(
+      "SELECT * FROM urls WHERE id = $1 AND exclude_date IS NULL",
+      [id]
+    );
     return result;
   }
 

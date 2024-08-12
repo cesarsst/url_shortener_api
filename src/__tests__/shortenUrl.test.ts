@@ -118,6 +118,46 @@ describe("Shorten URL controller", () => {
     ]);
   });
 
+  it("Should return an error when URL is excluded", async () => {
+    const loginResponse = await request(app).post("/auth/login").send({
+      email: "jhon@test.com",
+      password: "tester123",
+    });
+
+    expect(loginResponse.status).toBe(200);
+
+    const token = loginResponse.body.token;
+
+    const response = await request(app)
+      .post("/generateShortLink")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ url: "http://test.com" });
+
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty("shortUrl");
+
+    const shortUrl = response.body.shortUrl.split("/");
+    const baseUrl = `${shortUrl[0]}//${shortUrl[2]}`;
+    const path = shortUrl[3];
+
+    expect(baseUrl).toBe(process.env.BASE_URL);
+    expect(path).toHaveLength(6);
+
+    const responseDelete = await request(app)
+      .delete(`/users/deleteUrl/${path}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(responseDelete.status).toBe(200);
+    expect(responseDelete.body).toHaveProperty("message");
+    expect(responseDelete.body.message).toBe("URL deleted successfully");
+
+    const responseGet = await request(app).get(`/${path}`).send();
+
+    expect(responseGet.status).toBe(404);
+    expect(responseGet.body).toHaveProperty("message");
+    expect(responseGet.body.message).toBe("URL not found");
+  });
+
   it("Should return target URL when short URL is provided", async () => {
     const response = await request(app).get("/abc123").send();
 
